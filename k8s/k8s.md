@@ -64,6 +64,8 @@ kubectl get services kube-dns --namespace=kube-system
 
 开启kube-dns之后，每个Service名称会作为dns名称，在任意pod中通过Service名称即可访问对应服务，而无需知道Service的IP。
 
+如 kubectl run curl --image=radial/busyboxplus:curl -i --tty进入后执行nslookup \<service name\>
+
 ## 端口对外
 
 k8s提供两种将端口暴露在外网的方法：NodePort和LoadBalancer。在Service的spec中指定type为NodePort时，k8s将port映射到当前节点的一个端口，客通过节点IP和NodePort访问集群内的服务。
