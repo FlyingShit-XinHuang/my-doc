@@ -84,3 +84,5 @@ spec:
 ```
 
 创建后，使用kubectl exec \<spark-driver-podname\> -it pyspark即可访问。
+
+yaml配置参考[这里](spark-20160427.zip)
