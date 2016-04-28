@@ -2,7 +2,7 @@
 
 ## 安装
 
-docker安装参考https://docs.docker.com/linux/，其中还会有简单的操作示例。支持Linux、Mac OS X、Windows
+docker安装参考https://docs.docker.com/linux/ ，其中还会有简单的操作示例。支持Linux、Mac OS X、Windows
 
 ## 避免使用sudo的方法
 

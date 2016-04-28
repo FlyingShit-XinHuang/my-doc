@@ -26,7 +26,21 @@ Spark的组件介绍可参考[官方文档](http://spark.apache.org/docs/latest/
 
 #### Zeppelin webui使用问题
 
-同样只能通过localhost或127.0.0.1访问，目前尚未找到解决方法。
+同样只能通过localhost或127.0.0.1访问，可以通过将zeppelin service类型配置为NodePort。参考spark-20160427.zip中的zeppelin-service.yaml。
+使用方法为：
+
+* 使用zeppelin-service.yaml创建zeppelin service，可通过spec.ports.nodePort指定端口，不指定时为端口随机。
+* 使用kubectl describe svc zeppelin|grep NodePort指令查看端口。
+* 在浏览器中访问任意节点ip:NodePort访问zeppelin webui。
+* 点击“Create new note”，输入Note Name。
+* 在新页面中执行以下内容：
+
+  ```
+  %pyspark
+  print sc.textFile("/opt/spark/licenses/*").map(lambda s: len(s.split())).sum()
+  ```
+
+该示例会统计zeppelin本地/opt/spark/licenses/目录下的所有文件的单词数量，几秒后会看到执行结果。
 
 
 ## 基于tenxcloud镜像库搭建
