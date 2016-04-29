@@ -1,0 +1,23 @@
+kind: ReplicationController
+apiVersion: v1
+metadata:
+  name: spark-worker-controller
+spec:
+  replicas: 1
+  selector:
+    component: spark-worker
+  template:
+    metadata:
+      labels:
+        component: spark-worker
+    spec:
+      containers:
+        - name: spark-worker
+          image: index.tenxcloud.com/tenx_huangxin/spark-worker-with-cassandra-connector:1.5.2_v1
+          command: ["/start.sh"]
+          ports:
+            - containerPort: 8081
+          resources:
+            requests:
+              cpu: 100m
+

@@ -1,0 +1,19 @@
+kind: ReplicationController
+apiVersion: v1
+metadata:
+  name: spark-driver 
+spec:
+  replicas: 1
+  selector:
+    component: spark-driver
+  template:
+    metadata:
+      labels:
+        component: spark-driver
+    spec:
+      containers:
+        - name: spark-driver
+          image: index.tenxcloud.com/tenx_huangxin/spark-driver-with-cassandra-connector:1.5.2_v1
+          resources:
+            requests:
+              cpu: 100m
