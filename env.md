@@ -1,6 +1,6 @@
 ## Installing JRE
 
-apt-get install -y openjdk-7-jre-headless
+sudo apt-get install -y openjdk-7-jre-headless
 
 ## Installing Oracle JDK
 
