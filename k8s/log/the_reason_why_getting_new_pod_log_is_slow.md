@@ -48,4 +48,41 @@ curl http://192.168.1.81:8080/api/v1/proxy/namespaces/kube-system/services/elast
 
 ## 解决方法
 
-问题定位到了，解决就很简单了，只需要修改Fluentd配置，添加指定refresh_interval并重做镜像，再使用新的镜像来创建Fluentd agent Pod就好了。
+问题定位到了，解决就很简单了，只需要修改Fluentd配置，添加指定refresh_interval就好了。参考方法如下：
+
+* 登入fluentd pod所在node，查找fluentd的container id。并使用docker exec访问容器。
+
+```
+$ docker ps|grep fluentd
+4bbd5f71ef85        index.tenxcloud.com/tenxcloud/fluentd-elasticsearch:hosting   "/run.sh"                2 weeks ago         Up 25 minutes                           k8s_fluentd-elasticsearch.5f73fa89_fluentd-elasticsearch-192.168.1.84_kube-system_39c01b250b373a72f082d04d80fa3216_aa1c08a2
+ 
+$ docker exec -ti 4bbd5f71ef85 /bin/bash
+root@fluentd-elasticsearch-192:/#
+```
+
+* 编辑容器中td-agent.conf，找到path为/var/log/containers/*.log的source配置，添加refresh_interval 10配置项。保存并退出编辑，再退出容器。
+
+```
+root@fluentd-elasticsearch-192:/# vi /etc/td-agent/td-agent.conf
+...
+ 
+<source>
+  type tail
+  path /var/log/containers/*.log
+  pos_file /var/log/es-containers.log.pos
+  time_format %Y-%m-%dT%H:%M:%S
+  tag kubernetes.*
+  format json
+  read_from_head true
+  # refresh_interval是fluentd刷新path下文件列表的时间间隔的配置，这里改成了10秒
+  refresh_interval 10
+</source>
+ 
+...
+ 
+root@fluentd-elasticsearch-192:/# exit
+```
+
+* 执行docker restart 4bbd5f71ef85来重启fluentd容器。
+
+修改之后在该node上新建pod的日志加载将在10秒内完成。
