@@ -14,6 +14,8 @@
 
 这篇介绍了registry的配置：https://github.com/docker/distribution/blob/master/docs/configuration.md
 
+这篇介绍了registry的token认证方式：https://github.com/docker/distribution/blob/master/docs/spec/auth/token.md
+
 ## registry简易安装
 
 首先来介绍如何在本地安装一个简易的registry。我们用以下命令可以创建一个容器化的registry：
@@ -109,6 +111,8 @@ push之后，我们可以在挂载目录中看到数据了：
 ```
 
 虽然删除了manifest，通过API也读取不到对应镜像的信息了，但是blobs子目录下的空间并没有被释放。原来DELETE API只是删除了manifest对layer的引用，并未真正的删除对应的layer，删除layer是通过registry gc完成的。
+
+此外，如果registry配置了token认证方式（.auth.token配置项），在调用API删除之前还需要获取有删除权限的token，否则API会返回401错误。需要根据响应的Www-Authenticate header来确定scope信息。
 
 ## registry gc
 

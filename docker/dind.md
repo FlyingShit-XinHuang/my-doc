@@ -32,4 +32,22 @@ dind顾名思义就是在一个Docker容器中运行Docker。其最初是为了�
 
 这种方式避免使用--privileged参数，并且所有容器内的Docker可以共享主机的cache来提高构建效率。但这种方法也有缺点，就是隔离性的问题，例如不同容器内的Docker构建同名镜像会存在覆盖的问题。
 
+下载docker client方法为：
+
+  1. 在下面两个地址中选择对应包来下载linux docker binary：
+    * https://get.docker.com/builds/Linux/i386/docker-<version>.tgz
+    * https://get.docker.com/builds/Linux/x86_64/docker-<version>.tgz
+
+  2. 下载之后解压可以得到下列文件，其中docker/docker就是client：
+
+```
+$ tar -xvzf docker-1.11.0.tgz
+docker/
+docker/docker-containerd-ctr
+docker/docker
+docker/docker-containerd
+docker/docker-runc
+docker/docker-containerd-shim
+```
+
 两种方法各有优劣，大家可根据实际需求进行选择。
