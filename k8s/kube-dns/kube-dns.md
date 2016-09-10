@@ -61,8 +61,6 @@ options ndots:5
 
 当我们在容器中访问服务时，系统会将search记录与我们指定的名称拼接，并在nameserver中解析dns。如使用上述配置，当使用“service名称”访问服务时，最终会使用default.svc.cluster.local这条search记录拼接完整的服务名称，当使用“service名称.namespace”时，最终会使用svc.cluster.local这条search记录。cluster.local这条记录是为了兼容旧版本的服务，因为svc子域名在早期版本是没有的。
 
-如果想修改默认的resolv.conf配置，可以通过kubelet的--resolv-conf参数来指定配置文件路径。
-
 ## pod组成
 
 kube-dns pod由四个容器组成，skydns、etcd、kube2sky和healthz：
