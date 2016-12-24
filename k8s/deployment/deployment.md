@@ -116,10 +116,12 @@ nginx-deployment-956404068    2         2         2h
 
 * 支持多重更新，在更新过程中可以执行新的更新操作。Deployment会保证更新结果为最后一次更新操作的执行结果。
 * 影响更新的一些参数：
-    * .spec.minReadySeconds参数用来设置确认运行状态的最短等待时间。更新Pod之后，Deployment至少会等待配置的时间再确认Pod是否处于运行状态。也就是说在更新一批Pod之后，Deployment会至少等待指定时间再更新下一批Pod。
+    * .spec.minReadySeconds参数用来设置确认运行状态的最短等待时间。Pod就绪后会等待配置的时间之后再触发下一批Pod的更新。
     * .spec.strategy.rollingUpdate.maxUnavailable用来控制不可用Pod数量的最大值，从而在删除旧Pod时保证一定数量的可用Pod。如果配置为1，且replicas为3。则更新过程中会保证至少有2个可用Pod。默认为1。
     * .spec.strategy.rollingUpdate.maxSurge用来控制超过期望数量的Pod数量最大值，从而在创建新Pod时限制总量。如配置为1，且replicas为3。则更新过着中会保证Pod总数量最多有4个。默认为1。
     * 后两个参数不能同时为0。
+    * 如果replicas为1，应该把.spec.strategy.rollingUpdate.maxUnavailable设为0从而保证始终有可用的Pod。
+    * container的readinessProbe会通过影响Pod是否进入就绪状态来影响灰度升级，readinessProbe通过之后才会触发下一批Pod的更新。
 
 ### 更新回退
 
