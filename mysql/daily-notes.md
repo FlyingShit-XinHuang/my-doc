@@ -28,3 +28,11 @@ system > const > eq_ref > ref > fulltext > ref_or_null > index_merge > unique_su
 insert table(col1, col2, ...) select val1, val2, ... from DUAL where 条件
 ```
 DUAL表为mysql的特殊表，用于不需要指定“from table”的场景下。
+
+# 增量更新日期字段
+
+使用date_add实现：
+
+```
+update demo.app_packages set expired_at = date_add(expired_at, interval 10 day) where id = 'xxx'; 
+```
