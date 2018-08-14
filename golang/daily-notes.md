@@ -39,3 +39,7 @@ func main() {
     _ = fd
 }
 ```
+
+## Profiling
+
+Read https://blog.golang.org/profiling-go-programs
