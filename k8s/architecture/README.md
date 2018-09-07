@@ -7,7 +7,7 @@ k8s version：1.11
 * kube-scheduler。监控未分配的pods资源，为其分配node。
 * kube-controller-manager。包含：
   * Node Controller。负责监控node运行状态。
-  * Replication Controller。负责正常运行了指定数量的pod。
+  * Replication Controller。负责保持指定数量的pod能够正常运行。
   * Endpoints Controller。负责EP资源，以对应service与pod关系。
   * Service Account & Token Controllers。负责为namespace创建account和API access token
 * cloud-controller-manager。1.6版本新增的alpha功能。k8s核心代码之前耦合了适配云平台差异的逻辑。以后，这部分代码需要云平台自己维护，以连接cloud-controller-manager。包括：
@@ -22,7 +22,7 @@ k8s version：1.11
 
 加入cloud-controller-manager之后的架构：
 
-![有CCM的架构](images/post-ccm-arch.png))
+![有CCM的架构](images/post-ccm-arch.png)
 
   ## Node components
 
