@@ -3,7 +3,7 @@
 ## goroutine
 
 用户级的thread，由go runtime创建和管理，而非OS。go scheduler是一种M:N调度器，OS threads通过shceduler调度N个goroutines。
-如下图所示，其中M为os thread，P为调度器，G为goroutine
+如下图所示，其中M为os thread，P为调度的上下文，G为goroutine
 
 ![go scheduler原理](images/schedule.png)
 
