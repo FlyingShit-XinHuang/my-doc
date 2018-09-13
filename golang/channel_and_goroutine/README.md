@@ -269,9 +269,9 @@ func recv(c *hchan, sg *sudog, ep unsafe.Pointer, unlockf func(), skip int) {
 }
 ```
 
-### To read
+### Something interesting
 
-* [something interesting](https://segmentfault.com/a/1190000005055329)
+* [批操作](https://segmentfault.com/a/1190000005055329)
 
 ## 参考资料
 
