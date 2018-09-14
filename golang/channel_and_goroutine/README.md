@@ -9,6 +9,8 @@
 
 每个P都对应有自己的一个local的runqueue，P的数量由用户设置的GOMAXPROCS决定。
 
+G并非执行体，仅保存任务运行状态。实际执行体是线程M
+
 ### 系统调用
 
 go不能控制线程在进入内核态之后的行为。为了保证并发性能，只能在进入系统调用之前从线程池拿一个线程或者新建一个线程，并将P交给新线程。当前线程等待系统调用返回。
@@ -18,6 +20,18 @@ go不能控制线程在进入内核态之后的行为。为了保证并发性能
 ### work steal调度
 
 M在处理完P的local runqueue之后，会尝试从global runqueue中获取goroutine执行，如果没有，则从其他线程对应的P中steal一半的goroutine到自己的P中进行调度。
+
+### goroutine VS OS thread
+
+线程的成本：
+* 内存（线程的栈空间）：每个线程都需要一个栈（Stack）空间来保存挂起（suspending）时的状态。Java 的栈空间（64位VM）默认是 1024k，不算别的内存，只是栈空间，启动 1024 个线程就要 1G 内存。虽然可以用 -Xss 参数控制，但由于线程是本质上也是进程，系统假定是要长期运行的，栈空间太小会导致稍复杂的递归调用（比如复杂点的正则表达式匹配）导致栈溢出。所以调整参数治标不治本。
+* 调度成本（context-switch）：做模拟两个线程互相唤醒轮流挂起的测试，线程切换成本大约 6000 纳秒/次。这个还没考虑栈空间大小的影响。国外一篇论文专门分析线程切换的成本，基本上得出的结论是切换成本和栈空间使用大小直接相关。
+
+goroutine的成本：
+* (gopher china 2016 Dave slide )每个goroutine至少会占用2k的内存空间，2048 * 1,000,000 goroutines == 2Gb，也就是说，2G内存的机器，最多可以承担100万的goroutine
+* M:N调度器实现线程池中每个线程调度多个goroutine的用户级调度机制，可以摒弃一些系统级调度特性和功能，更加轻量化。上下文切换不在内核态运行，开销较低，只需要保存/恢复Program Counter, Stack Pointer和DX（数据寄存器）等信息。
+
+因为 G 初始栈仅有 2KB，且创建操作只是在用户空间简单的对象分配，远比进入内核态 分配线程要简单得多。
 
 ## channel
 
@@ -278,3 +292,7 @@ func recv(c *hchan, sg *sudog, ep unsafe.Pointer, unlockf func(), skip int) {
 * https://blog.csdn.net/jiankunking/article/details/79056677
 * https://about.sourcegraph.com/go/understanding-channels-kavya-joshi/
 * https://blog.csdn.net/kongdefei5000/article/details/75209005
+* https://blog.csdn.net/zdy0_2004/article/details/50785568
+* https://www.cnblogs.com/diegodu/p/5607627.html
+* https://github.com/qyuhen/book/blob/master/Go%201.5%20%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90%20%EF%BC%88%E4%B9%A6%E7%AD%BE%E7%89%88%EF%BC%89.pdf
+* https://stackoverflow.com/questions/41045362/what-happens-with-cpu-context-when-goroutines-are-switching
