@@ -16,7 +16,7 @@ func Trap(height []int) int {
 		}
 	}
 
-	// Traverse the slice from two sides to the highest.
+	// Traverse the slice from lower side to the higher.
 	// Use two 'max' vars to record peaks during traverse.
 	for lIdx < rIdx {
 		if height[lIdx] < height[rIdx] {
