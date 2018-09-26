@@ -24,7 +24,7 @@ kube-proxy为每个service设置iptables规则，来捕获访问service clusterI
 
 iptables模式不需要在用户空间和内核空间来回切换，会比用户空间模式更快更可靠。然而该模式不能在pod未响应的情况下使用其他pod重试，因此会依赖readiness probe的设置。
 
-![iptables mode](services-iptables-overview.svg)
+![iptables mode](images/services-iptables-overview.svg)
 
 #### ipvs模式
 
@@ -38,7 +38,7 @@ kube-proxy调用netlink接口创建ipvs规则并根据service和endpoint状态�
 
 该模式需要node上预先安装IPVS内核模块，如果未安装，则使用iptables模式。
 
-![ipvs mode](services-ipvs-overview.svg)
+![ipvs mode](images/services-ipvs-overview.svg)
 
 ## 发现service
 
