@@ -53,3 +53,7 @@ godoc -http=:6060
 ```
 
 and pointing your browser to http://localhost:6060
+
+## random bytes
+
+ref https://stackoverflow.com/questions/22892120/how-to-generate-a-random-string-of-a-fixed-length-in-go
