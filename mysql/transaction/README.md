@@ -14,7 +14,7 @@
 ## 事务隔离级别
 
 * read-uncommitted
-* read-commited。可解决脏读的问题。写数据会锁住行。
+* read-committed。可解决脏读的问题。写数据会锁住行。
 * repeatable-read。默认的隔离级别，可解决脏读和不可重复读的问题。如果检索条件没有索引，更新会锁住整张表，否则会加next-key锁
 * serializable。读写会锁表，可解决脏读、不可重复读和幻读的问题。
 
@@ -22,7 +22,7 @@
 
 ## 锁
 
-### 共享锁（又称读锁）、排它锁（又称写锁）
+### 共享锁（又称读锁，shared locks）、排它锁（又称写锁，exclusive locks）、意向锁（intention locks）
 
 * 共享锁（S）：允许一个事务去读一行，阻止其他事务获得相同数据集的排他锁。
 * 排他锁（X)：允许获得排他锁的事务更新数据，阻止其他事务取得相同数据集的共享读锁和排他写锁。
@@ -40,15 +40,40 @@ InnoDB行锁是通过给索引上的索引项加锁来实现的，因此InnoDB�
 
 即便在条件中使用了索引字段，但是否使用索引来检索数据是由MySQL通过判断不同执行计划的代价来决定的，如果MySQL认为全表扫描效率更高，比如对一些很小的表，它就不会使用索引，这种情况下InnoDB将使用表锁，而不是行锁。因此，在分析锁冲突时，别忘了检查SQL的执行计划，以确认是否真正使用了索引。
 
-### 间隙锁
+### 记录锁（record locks）
 
-当我们用范围条件而不是相等条件检索数据，并请求共享或排他锁时，InnoDB会给符合条件的已有数据记录的索引项加锁；
+锁住一条索引记录。例如SELECT c1 FROM t WHERE c1 = 10 FOR UPDATE，会阻止其他事务增删改c1 = 10的记录。
 
-对于键值在条件范围内但并不存在的记录，叫做“间隙（GAP)”，InnoDB也会对这个“间隙”加锁，这种锁机制就是所谓的间隙锁（Next-Key锁）。
+在read committed级别下，如果没有匹配的记录，则记录锁会在where执行后释放。
 
-如果使用相等条件的query给一个不存在的记录加锁，InnoDB也会使用间隙锁。
+### 间隙锁（gap locks）
 
-当query使用的where还包含非索引列时，索引键所指向的数据可能有部分并不属于该query的结果集的行列，但是也会被锁定。
+* 锁住一个范围的索引记录。例如SELECT c1 FROM t WHERE c1 BETWEEN 10 and 20 FOR UPDATE，会阻止其他事务插入c1为15的记录。
+* 使用unique index查询单条记录不会使用间隙锁。如SELECT * FROM child WHERE id = 100。如果示例中id不为unique index则会使用间隙锁。
+* 间隙锁的目的是阻止其他事务在范围内插入数据。
+* 共享间隙锁和排他间隙锁没有差别，可同时存在于相同间隙。原因是为了使在索引中被清除的记录会被其他事务合并。
+* 将事务隔离级别改为read committed后，在搜索和索引扫描时会禁用间隙锁。此时间隙锁只用来做外键约束和重复键的检查。
+
+### next-key locks
+
+* next-key锁是记录锁和间隙锁的组合，锁在索引记录和该记录之前的间隙，即一个事务锁住索引为R的记录后，其他事务无法在R之前的间隙插入新记录。
+* 如果索引包含10, 11, 13, 20，则可能会存在以下next-key锁：
+```
+(negative infinity, 10]
+(10, 11]
+(11, 13]
+(13, 20]
+(20, positive infinity)
+```
+* 在repeatable read隔离级别下，InnoDB使用在搜索以及扫描index时使用next-key锁来防止幻读。
+
+### 插入意向锁（insert intention locks）
+
+插入意向锁是insert操作在插入行之前设置的一种间隙锁。用来表明一种插入意向，当多个事务在同一个索引间隙不同位置插入时不需要互相等待。如两个事务在4~7索引值间隙中插入5和6，在获取排它锁之前，使用插入意向锁锁住索引间隙。
+
+### 自增锁（AUTO-INC locks）
+
+是一种特殊的表级锁，事务向包含AUTO_INCREMENT列的表插入时使用。
 
 ### 乐观锁、悲观锁
 
@@ -78,3 +103,4 @@ CAS问题：
 * https://www.cnblogs.com/protected/p/6526857.html
 * https://www.cnblogs.com/aipiaoborensheng/p/5767459.html
 * https://www.cnblogs.com/dongqingswt/p/3460440.html
+* https://dev.mysql.com/doc/refman/8.0/en/innodb-locking.html
