@@ -15,10 +15,27 @@
 
 * read-uncommitted
 * read-committed。可解决脏读的问题。写数据会锁住行。
-* repeatable-read。默认的隔离级别，可解决脏读和不可重复读的问题。如果检索条件没有索引，更新会锁住整张表，否则会加next-key锁
+* repeatable-read。默认的隔离级别，可解决脏读和不可重复读的问题。
 * serializable。读写会锁表，可解决脏读、不可重复读和幻读的问题。
 
 隔离级别越高，越能保证数据的完整性和一致性，但是对并发性能的影响也越大。
+
+### REPEATABLE READ
+
+事务中的第一次读操作会建立快照，后续读操作结果会基于快照来保证事务中读操作的一致性。
+
+SELECT ... LOCK IN SHARE MODE、SELECT ... FOR UPDATE、UPDATE、DELETE语句使用以下锁：
+
+* 在唯一索引上使用结果唯一的搜索条件，InnoDB引擎只锁住查找到的index，不会锁住index前的间隙。
+* 使用间隙锁或next-key lock锁住被扫描的index范围，阻塞其他事务在其中插入数据。
+
+### READ COMMITTED
+
+事务中每次读都设置及刷新各自快照。SELECT ... LOCK IN SHARE MODE、SELECT ... FOR UPDATE、UPDATE、DELETE语句只会锁住index记录而不是间隙。
+
+UPDATE语句在该级别下使用“semi-consistent”读：如果行已被锁住，从而检查最新提交的版本数据是否满足WHERE条件，满足则再次读取并对这些行加锁或阻塞。
+
+UPDATE、DELETE语句会在WHERE语句执行后立即释放不满足条件行的锁，而不是等到事务结束。
 
 ## 锁
 
